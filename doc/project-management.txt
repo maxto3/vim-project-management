@@ -36,18 +36,17 @@ Neovim.
 - The built-in netrw file browser.
 - The `opencode` executable for the left panel.
 
-Install as a native Vim package:
+Install with vim-plug from the local Git repository:
 
-    Windows: ~/.vim/pack/project-management/start/project-management
-    Unix:    ~/.vim/pack/project-management/start/project-management
+    Plug 'file:///D:/source/repos/project-management'
 
-Windows Vim uses `~/vimfiles` in 'packpath' by default.  If the plugin is under
-`~/.vim`, add this to the vimrc:
+Run `:PlugInstall`; vim-plug clones it to
+`~/.vim/plugged/project-management` and loads it from there.  Use the
+`file:///` URL rather than a bare `D:/...` path, because vim-plug treats a bare
+local path as a plugin directory to add to 'runtimepath' instead of cloning it.
 
-    set packpath^=~/.vim
-
-Alternatively place it under `~/vimfiles/pack/project-management/start/`.
-Vim loads native packages automatically with `packloadall` after the vimrc.
+After committing changes in the source repository, run
+`:PlugUpdate project-management` to refresh the installed copy.
 
 All `.vim` source files must use UTF-8 without BOM and LF line endings.  CRLF
 causes `E1173` after `enddef` in Vim9 scripts.

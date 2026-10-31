@@ -46,36 +46,46 @@ line endings. CRLF causes `E1173` after `enddef`.
 
 ## Installation
 
-Install it as a standard Vim 8+ package. On Windows, the active path is:
+The development repository lives at:
 
 ```text
-C:\Users\<you>\.vim\pack\project-management\start\project-management
+D:\source\repos\project-management
 ```
 
-On Unix-like systems:
-
-```text
-~/.vim/pack/project-management/start/project-management
-```
-
-The repository is already in that layout. No vim-plug entry is needed.
-
-Windows Vim's default `packpath` is `~/vimfiles`, not `~/.vim`. If you keep the
-plugin under `~/.vim`, add this to the vimrc before Vim starts loading packages:
+Install it through vim-plug from that local Git repository:
 
 ```vim
-set packpath^=~/.vim
+Plug 'file:///D:/source/repos/project-management'
 ```
 
-Packages are loaded automatically (`packloadall`) after the vimrc. Alternatively
-place the checkout under `~/vimfiles/pack/project-management/start/` and omit
-the `packpath` line.
+Then run:
+
+```vim
+:PlugInstall
+```
+
+vim-plug clones the repository into:
+
+```text
+C:\Users\<you>\.vim\plugged\project-management
+```
+
+and loads the plugin from there. The plugin is **not** loaded directly from
+`D:\source\repos\project-management`; use `file:///` rather than a bare
+`D:/...` path so vim-plug treats it as a Git repository and clones it.
+
+After changing and committing the source repository, update the installed
+copy with:
+
+```vim
+:PlugUpdate project-management
+```
 
 ### Backup
 
-The plugin now lives inside `~/.vim`, so `gvim_backup.py` includes it in the
-normal `~/.vim` archive. A separate snapshot is also kept in the restore
-bundle.
+The installed copy is under `~/.vim/plugged`, so `gvim_backup.py` includes it
+in the normal `~/.vim` archive. Keep the source repository under Git as the
+canonical development copy.
 
 ## Commands
 

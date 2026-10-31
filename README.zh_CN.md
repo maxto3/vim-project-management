@@ -40,34 +40,44 @@ Vim 9 / GVim 的 VS Code 风格项目工作区，使用 Vim9 script 编写。
 
 ## 安装
 
-作为标准 Vim 8+ 原生包安装。Windows 当前路径：
+开发源码仓库位于：
 
 ```text
-C:\Users\<you>\.vim\pack\project-management\start\project-management
+D:\source\repos\project-management
 ```
 
-Unix-like：
-
-```text
-~/.vim/pack/project-management/start/project-management
-```
-
-仓库已经在该布局下，不需要 vim-plug 条目。
-
-Windows Vim 的默认 `packpath` 是 `~/vimfiles`，不是 `~/.vim`。如果插件放在
-`~/.vim`，在 vimrc 中加入：
+通过 vim-plug 从该本地 Git 仓库安装：
 
 ```vim
-set packpath^=~/.vim
+Plug 'file:///D:/source/repos/project-management'
 ```
 
-Vim 会在读取 vimrc 之后自动执行 `packloadall`。也可以把 checkout 放到
-`~/vimfiles/pack/project-management/start/`，这样不需要改 `packpath`。
+然后执行：
+
+```vim
+:PlugInstall
+```
+
+vim-plug 会克隆到：
+
+```text
+C:\Users\<you>\.vim\plugged\project-management
+```
+
+并从该目录加载插件。插件**不会**直接从 `D:\source\repos\project-management`
+加载；必须使用 `file:///`，不要用裸的 `D:/...` 路径，否则 vim-plug 会把源码
+目录直接加入 runtimepath，而不是克隆安装。
+
+修改并提交源码仓库后，用下面的命令更新安装副本：
+
+```vim
+:PlugUpdate project-management
+```
 
 ### 备份
 
-插件现在位于 `~/.vim` 内，`gvim_backup.py` 会随 `~/.vim` 一起归档；恢复包
-里另外保留了一份快照。
+安装副本位于 `~/.vim/plugged`，`gvim_backup.py` 会随 `~/.vim` 一起归档；源码
+仓库应继续用 Git 管理。
 
 ## 命令
 
