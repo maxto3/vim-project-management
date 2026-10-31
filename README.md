@@ -81,6 +81,10 @@ copy with:
 :PlugUpdate project-management
 ```
 
+Once the source repository is published to a remote (GitHub/GitLab/etc.),
+change the `Plug` URL to that remote address; vim-plug keeps the same
+`~/.vim/plugged/project-management` directory.
+
 ### Backup
 
 The installed copy is under `~/.vim/plugged`, so `gvim_backup.py` includes it

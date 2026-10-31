@@ -74,6 +74,9 @@ C:\Users\<you>\.vim\plugged\project-management
 :PlugUpdate project-management
 ```
 
+以后把源码仓库推送到远程（GitHub/GitLab 等）后，把 `Plug` URL 改为远程地址
+即可；vim-plug 仍使用同一个 `~/.vim/plugged/project-management` 目录。
+
 ### 备份
 
 安装副本位于 `~/.vim/plugged`，`gvim_backup.py` 会随 `~/.vim` 一起归档；源码
