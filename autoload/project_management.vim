@@ -444,32 +444,40 @@ export def NetrwEnter(): void
     return
   endif
 
-  # Make the editor the alternate window, then let netrw resolve the entry and
-  # open it. This preserves tree/list navigation while forcing files to open in
-  # the center editor instead of whichever window was previous.
+  # Resolve the entry under the cursor with netrw's own helpers. Files are
+  # opened explicitly in the center editor; directories stay in the browser.
+  # This avoids relying on netrw's "previous window" and never moves windows.
   var word = netrw#Call('NetrwGetWord')
   if type(word) != v:t_string || word == ''
     return
   endif
-  var target = netrw#Call('NetrwBrowseChgDir', 1, word, 1)
-  if type(target) != v:t_string || target == ''
+  var tree = netrw#Call('NetrwTreePath', get(w:, 'netrw_treetop', get(b:, 'netrw_curdir', project.root)))
+  if type(tree) != v:t_string || tree == ''
+    tree = get(b:, 'netrw_curdir', project.root)
+  endif
+
+  var path = tree
+  if path !~# '[/\\]$'
+    path ..= '/'
+  endif
+  path ..= word
+  path = substitute(path, '[/\\]\+', '/', 'g')
+  path = fnamemodify(path, ':p')
+  path = substitute(path, '[/\\]$', '', '')
+
+  if isdirectory(path)
+    win_gotoid(project.files_win)
+    call netrw#LocalBrowseCheck(path)
+    if project.files_win > 0 && win_id2win(project.files_win) > 0
+      win_gotoid(project.files_win)
+      NetrwSetup()
+    endif
     return
   endif
-  var isdir = isdirectory(target)
 
-  win_gotoid(project.editor_win)
-  win_gotoid(project.files_win)
-  call netrw#LocalBrowseCheck(target)
-
-  var files = project.files_win
-  if files > 0 && win_id2win(files) > 0
-    win_gotoid(files)
-    NetrwSetup()
-  endif
-  if !isdir
-    if project.editor_win > 0 && win_id2win(project.editor_win) > 0
-      win_gotoid(project.editor_win)
-    endif
+  if filereadable(path)
+    win_gotoid(project.editor_win)
+    execute 'edit ' .. fnameescape(path)
   endif
 enddef
 
