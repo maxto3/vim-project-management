@@ -14,14 +14,24 @@ command! ProjectStatus project_management.Status()
 command! ProjectOutline project_management.Outline()
 command! ProjectToggleOutline project_management.ToggleOutline()
 command! ProjectNetrwEnter project_management.NetrwEnter()
+command! ProjectFocusOutline project_management.FocusOutline()
 
 def OnNetrw()
   project_management.NetrwSetup()
 enddef
 
+def OnEditorBufEnter()
+  project_management.OnEditorBufEnter()
+enddef
+
 augroup project_management_netrw
   autocmd!
   autocmd FileType netrw call OnNetrw()
+augroup END
+
+augroup project_management_editor
+  autocmd!
+  autocmd BufEnter * call OnEditorBufEnter()
 augroup END
 
 project_management.Init()

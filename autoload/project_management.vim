@@ -20,6 +20,8 @@ export var project: dict<any> = {
   saved_hidden: false,
   saved_files: {},
   saved_outline_split: 'botright 30vs',
+  saved_outline_check: true,
+  outline_buf: -1,
 }
 
 var outline_busy = false
@@ -145,6 +147,7 @@ def ApplyResult(res: dict<any>): void
   project.terminal_win = res.terminal
   project.opencode_buf = res.opencode_buf
   project.terminal_buf = res.terminal_buf
+  project.outline_buf = winbufnr(res.editor)
 enddef
 
 def SetupNetrw(): void
@@ -194,6 +197,7 @@ enddef
 def RestoreEnvironment(): void
   files.RestoreConfig(project.saved_files)
   outline.SetSplit(project.saved_outline_split)
+  outline.SetCheckBufferSwitch(project.saved_outline_check)
   if !project.saved_hidden
     set nohidden
   endif
@@ -213,6 +217,8 @@ def ResetState(): void
   project.terminal_buf = -1
   project.saved_files = {}
   project.saved_outline_split = 'botright 30vs'
+  project.saved_outline_check = true
+  project.outline_buf = -1
 enddef
 
 export def Open(path: string): void
@@ -231,10 +237,12 @@ export def Open(path: string): void
   project.saved_hidden = &hidden
   project.saved_files = files.SaveConfig()
   project.saved_outline_split = outline.SaveConfig()
+  project.saved_outline_check = outline.SaveCheckBufferSwitch()
 
   set hidden
   files.ApplyConfig()
   outline.SetSplit('edit')
+  outline.SetCheckBufferSwitch(false)
 
   silent! only
   if &buftype != ''
@@ -372,6 +380,7 @@ export def Outline(): void
   endif
   var winid = coc#window#find('cocViewId', 'OUTLINE')
   if winid > 0
+    project.outline_buf = winbufnr(project.editor_win)
     win_gotoid(winid)
     return
   endif
@@ -392,9 +401,26 @@ export def Outline(): void
     enew
     setlocal buftype=nofile bufhidden=wipe nobuflisted
     setline(1, ['Outline', 'Press F2 after the LSP is ready'])
+  else
+    project.outline_buf = winbufnr(project.editor_win)
   endif
   if project.editor_win > 0 && win_id2win(project.editor_win) > 0
     win_gotoid(project.editor_win)
+  endif
+enddef
+
+export def FocusOutline(): void
+  if !project.active
+    echomsg 'No project is open'
+    return
+  endif
+  Outline()
+  if !exists('g:did_coc_loaded')
+    return
+  endif
+  var winid = coc#window#find('cocViewId', 'OUTLINE')
+  if winid > 0
+    win_gotoid(winid)
   endif
 enddef
 
@@ -417,6 +443,39 @@ def MakeOutlinePlaceholder(files_win: number): number
   endif
   execute 'resize ' .. h
   return w
+enddef
+
+export def OnEditorBufEnter(): void
+  if !project.active || outline_busy
+    return
+  endif
+  if !exists('g:did_coc_loaded')
+    return
+  endif
+  if project.editor_win <= 0 || win_getid() != project.editor_win
+    return
+  endif
+  if &buftype != ''
+    return
+  endif
+  var name = bufname('%')
+  if name == '' || !IsUnder(fnamemodify(name, ':p'), project.root)
+    return
+  endif
+  if coc#window#find('cocViewId', 'OUTLINE') <= 0
+    return
+  endif
+  var b = bufnr('%')
+  if project.outline_buf == b
+    return
+  endif
+  outline_busy = true
+  try
+    call('CocAction', ['showOutline', 1])
+    project.outline_buf = b
+  catch
+  endtry
+  outline_busy = false
 enddef
 
 export def NetrwSetup(): void
@@ -503,6 +562,7 @@ export def ToggleOutline(): void
       outline.Close()
     catch
     endtry
+    project.outline_buf = -1
     project.outline_win = MakeOutlinePlaceholder(project.files_win)
     if project.editor_win > 0 && win_id2win(project.editor_win) > 0
       win_gotoid(project.editor_win)

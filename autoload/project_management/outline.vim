@@ -18,6 +18,24 @@ export def SetSplit(cmd: string): void
   endtry
 enddef
 
+export def SaveCheckBufferSwitch(): bool
+  if exists('g:coc_user_config')
+    return get(g:coc_user_config, 'outline.checkBufferSwitch', true)
+  endif
+  return true
+enddef
+
+export def SetCheckBufferSwitch(value: bool): void
+  if !exists('g:did_coc_loaded')
+    return
+  endif
+  try
+    g:coc_user_config['outline.checkBufferSwitch'] = value
+    coc#config('outline.checkBufferSwitch', value)
+  catch
+  endtry
+enddef
+
 # Open the coc outline inside the given target window without creating a new
 # split. The target window is temporarily pointed at the editor buffer so coc
 # can resolve the document symbols, then coc replaces it with the tree buffer.
