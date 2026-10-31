@@ -542,11 +542,31 @@ export def NetrwEnter(): void
   path = substitute(path, '[/\\]$', '', '')
 
   if isdirectory(path)
+    var oldbase = fnamemodify(get(b:, 'netrw_curdir', project.root), ':t')
+    var dirtext = line
     win_gotoid(project.files_win)
     call netrw#LocalBrowseCheck(path)
     if project.files_win > 0 && win_id2win(project.files_win) > 0
       win_gotoid(project.files_win)
       NetrwSetup()
+
+      # Keep the cursor near the directory the user just entered.  In tree
+      # mode netrw expands the entry in place; keep the cursor on that line.
+      # For non-tree listings or when the line is gone, use the first entry
+      # after "../" instead of leaving the cursor at the top.
+      var target = ''
+      if word == '../' || line ==# '../'
+        target = '^[│ ]*' .. escape(oldbase, '\.*$^~[]') .. '/$'
+      elseif isdir_entry && dirtext != ''
+        target = '^' .. escape(dirtext, '\.*$^~[]') .. '$'
+      endif
+      if target != ''
+        cursor(1, 1)
+        search(target, 'cw')
+      endif
+      if line('.') == 1 && line('$') > 1
+        cursor(2, 1)
+      endif
     endif
     return
   endif
