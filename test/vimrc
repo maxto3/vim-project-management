@@ -1,0 +1,12 @@
+vim9script
+
+set nocompatible
+set noloadplugins
+set noswapfile
+
+var root = fnamemodify(expand('<sfile>:p:h'), ':h')
+execute 'set runtimepath^=' .. fnameescape(root)
+
+runtime plugin/project_management.vim
+g:project_management_enable_terminals = false
+g:project_management_enable_netrw = false

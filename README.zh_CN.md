@@ -1,0 +1,149 @@
+# project-management
+
+Vim 9 / GVim 的 VS Code 风格项目工作区，使用 Vim9 script 编写。
+
+```
++------------+-------------------------------+------------------+
+|            |                               | 文件浏览器       |
+|  opencode  |          编辑器               | (netrw, 上)      |
+|  (左侧)    |                               |------------------|
+|            |                               | outline (下)     |
++------------+-------------------------------+------------------+
+|                    终端（项目根目录）                          |
++-----------------------------------------------------------------+
+```
+
+## 功能
+
+- `:ProjectOpen [path]` 在当前 tab 打开项目，不创建 Vim tab。
+- 中间窗口是唯一的编辑窗口。文件浏览器选择的文件在这里打开，所有打开的
+  文件以 buffer 形式保留。
+- 左栏运行 `opencode`，工作目录为项目根目录。
+- 底部窗口运行配置的 shell，工作目录为项目根目录。
+- 右栏包含 netrw 文件浏览器和 coc outline；选择 outline 符号会跳转到中间
+  编辑器的对应位置。
+- `:ProjectClose` 停止项目终端、清理项目文件 buffer、保留非项目 buffer、
+  恢复 gvim 启动目录，并只保留一个空的 `[No Name]` 窗口。
+- `:ProjectClose!` 强制清空所有 buffer、窗口和 tab。
+
+## 要求
+
+- Vim 9.0+，带 `+terminal` 和 Vim9 script 支持（已在 Vim 9.2 / Windows
+  GVim 验证）。
+- `coc.nvim`，用于 outline 和 LSP。
+- 内置 netrw。
+- `opencode` 在 `PATH` 中。安装见 <https://opencode.ai>。
+- **仅支持 Vim**，Vim9 script 不兼容 Neovim。
+
+所有插件源码均为 Vim9 script，必须使用 UTF-8 无 BOM、LF 换行。CRLF 会在
+`enddef` 后触发 `E1173`。
+
+## 安装
+
+作为标准 Vim 8+ 原生包安装。Windows 当前路径：
+
+```text
+C:\Users\<you>\.vim\pack\project-management\start\project-management
+```
+
+Unix-like：
+
+```text
+~/.vim/pack/project-management/start/project-management
+```
+
+仓库已经在该布局下，不需要 vim-plug 条目。
+
+Windows Vim 的默认 `packpath` 是 `~/vimfiles`，不是 `~/.vim`。如果插件放在
+`~/.vim`，在 vimrc 中加入：
+
+```vim
+set packpath^=~/.vim
+```
+
+Vim 会在读取 vimrc 之后自动执行 `packloadall`。也可以把 checkout 放到
+`~/vimfiles/pack/project-management/start/`，这样不需要改 `packpath`。
+
+### 备份
+
+插件现在位于 `~/.vim` 内，`gvim_backup.py` 会随 `~/.vim` 一起归档；恢复包
+里另外保留了一份快照。
+
+## 命令
+
+| 命令 | 说明 |
+| --- | --- |
+| `:ProjectOpen [path]` | 打开项目；无参数时使用 `PWD`。 |
+| `:ProjectClose` | 关闭项目，保留非项目 buffer。 |
+| `:ProjectClose!` | 关闭项目并清空所有 buffer/窗口/tab。 |
+| `:ProjectReload` | 重建项目布局，保留项目 buffer。 |
+| `:ProjectStatus` | 显示根目录、PWD、窗口 ID 和终端 buffer。 |
+| `:ProjectOutline` | 打开/聚焦 outline 窗口。 |
+| `:ProjectToggleOutline` | 切换右侧栏 outline。 |
+
+项目打开时 `F2` 自动调用 `:ProjectToggleOutline`；非项目状态下保持原有的
+coc outline 切换行为。
+
+## 布局与行为
+
+- `:ProjectOpen` 先把当前 tab 收敛为一个窗口，再用显式的
+  `aboveleft`/`belowright` 分割构建布局。已有 buffer 会保留。
+- 项目打开期间临时启用 `'hidden'`，让中间编辑器可以同时持有多个 buffer。
+  关闭时恢复原值。
+- netrw 使用 `g:netrw_browse_split = 4`，文件在“上一个窗口”打开。通常这个
+  窗口是中间编辑器；如果先从 outline 切到文件浏览器，请先从编辑器进入文件
+  浏览器再选择文件。
+- outline 在项目期间使用 coc 的 `outline.splitCommand = edit`，在右侧预留
+  窗口中打开，不新开列。关闭项目时恢复原值。
+- 如果项目打开时 LSP 尚未就绪，outline 窗口显示“Outline unavailable”占位。
+  等该文件的 LSP 就绪后按 `F2` 或执行 `:ProjectOutline`，coc 会填充 outline
+  并跟随当前 buffer。
+- outline 的打开/关闭不会替换中间编辑器的文件。
+
+## 配置
+
+```vim
+" 布局（左侧宽度为总列数比例）
+let g:project_management_left_width    = 0.28
+let g:project_management_right_width   = 34
+let g:project_management_bottom_height = 14
+let g:project_management_winminwidth   = 20
+let g:project_management_winminheight  = 5
+
+" opencode
+let g:project_management_opencode_cmd  = 'opencode'
+let g:project_management_opencode_args = []
+
+" 底部 shell；空字符串表示使用 &shell
+let g:project_management_shell = ''
+
+" 无终端环境/测试时设为 0
+let g:project_management_enable_terminals = 1
+
+" 测试时可设为 0，用占位窗口替代 netrw
+let g:project_management_enable_netrw = 1
+```
+
+## 为什么选择 netrw
+
+- 零额外依赖；
+- `g:netrw_browse_split = 4` 正好对应“在中间编辑器打开”；
+- 可以直接放在右栏，不需要再引入一个 coc 树视图与 outline 竞争窗口位置。
+
+## 测试
+
+仓库包含无头冒烟测试：
+
+```powershell
+.\test\run.ps1
+```
+
+测试通过 `test/vimrc` 关闭终端和 netrw，验证打开/关闭、无 tab、项目 buffer
+清理、非项目 buffer 保留、PWD 恢复和 `:ProjectClose!`。
+
+## 限制
+
+- outline 依赖 coc 语言服务器；服务器未就绪时请按 `F2` 或
+  `:ProjectOutline`。
+- `:ProjectClose!` 按设计是破坏性的。
+- 项目期间会全局设置 `outline.splitCommand`，关闭时恢复。

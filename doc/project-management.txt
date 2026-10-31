@@ -1,0 +1,164 @@
+*project-management.txt*  VS Code-like project workspace for Vim 9
+
+==============================================================================
+CONTENTS                                                    *project-management*
+
+    1. Introduction ........................ |project-management-intro|
+    2. Requirements ........................ |project-management-requirements|
+    3. Commands ............................ |project-management-commands|
+    4. Layout .............................. |project-management-layout|
+    5. Options ............................. |project-management-options|
+    6. Notes ............................... |project-management-notes|
+
+==============================================================================
+1. INTRODUCTION                                     *project-management-intro*
+
+project-management opens a project in the current Vim tab and builds a layout
+similar to VS Code:
+
+    +------------+-------------------------------+------------------+
+    |            |                               | file browser     |
+    |  opencode  |          editor               | (netrw, top)     |
+    |  (left)    |                               |------------------|
+    |            |                               | outline (bottom) |
+    +------------+-------------------------------+------------------+
+    |                   terminal (project root)                       |
+    +-----------------------------------------------------------------+
+
+The plugin is written in Vim9 script and requires Vim 9.  It does not support
+Neovim.
+
+==============================================================================
+2. REQUIREMENTS                                 *project-management-requirements*
+
+- Vim 9.0 or newer with |+terminal|.
+- |coc.nvim| for the outline and LSP.
+- The built-in netrw file browser.
+- The `opencode` executable for the left panel.
+
+Install as a native Vim package:
+
+    Windows: ~/.vim/pack/project-management/start/project-management
+    Unix:    ~/.vim/pack/project-management/start/project-management
+
+Windows Vim uses `~/vimfiles` in 'packpath' by default.  If the plugin is under
+`~/.vim`, add this to the vimrc:
+
+    set packpath^=~/.vim
+
+Alternatively place it under `~/vimfiles/pack/project-management/start/`.
+Vim loads native packages automatically with `packloadall` after the vimrc.
+
+All `.vim` source files must use UTF-8 without BOM and LF line endings.  CRLF
+causes `E1173` after `enddef` in Vim9 scripts.
+
+==============================================================================
+3. COMMANDS                                         *project-management-commands*
+
+                                                        *:ProjectOpen*
+:ProjectOpen [path]     Open the project at {path}.  Without an argument, use
+                        the current working directory.  Existing project
+                        terminals and layout are closed first.
+
+                                                        *:ProjectClose*
+:ProjectClose           Close the project.  Project file buffers are wiped,
+                        non-project buffers are preserved, project terminals
+                        are stopped, the startup working directory is restored,
+                        and one empty `[No Name]` window remains.
+
+                                                        *:ProjectClose!*
+:ProjectClose!          Force a full cleanup: all buffers, windows and tabs are
+                        removed.
+
+                                                        *:ProjectReload*
+:ProjectReload          Rebuild the project layout without destroying project
+                        buffers.
+
+                                                        *:ProjectStatus*
+:ProjectStatus          Show the project root, PWD, window IDs and terminal
+                        buffers.
+
+                                                        *:ProjectOutline*
+:ProjectOutline         Open or focus the outline window.  Use this after the
+                        language server is ready if the outline started with an
+                        "Outline unavailable" placeholder.
+
+                                                        *:ProjectToggleOutline*
+:ProjectToggleOutline   Toggle the outline in the right column.  While a
+                        project is active, |F2| calls this command.
+
+==============================================================================
+4. LAYOUT                                             *project-management-layout*
+
+- The current tab is collapsed to one window, then the layout is built with
+  explicit `aboveleft` / `belowright` splits.
+- The center window is the only editing window.  netrw uses
+  `g:netrw_browse_split = 4` so files open in the previous window; the editor
+  is normally that window.
+- The left column runs opencode with the project root as its working
+  directory.
+- The bottom row runs the shell with the project root as its working
+  directory.
+- The right column contains netrw and the coc outline.
+- The plugin temporarily enables 'hidden' while a project is open and restores
+  the previous value on close.
+
+==============================================================================
+5. OPTIONS                                           *project-management-options*
+
+                                        *g:project_management_left_width*
+Default: 0.28
+Left column width as a ratio of `&columns`.
+
+                                        *g:project_management_right_width*
+Default: 34
+Right column width in columns.
+
+                                        *g:project_management_bottom_height*
+Default: 14
+Bottom terminal height in lines.
+
+                                        *g:project_management_winminwidth*
+Default: 20
+Minimum width used when computing the side columns.
+
+                                        *g:project_management_winminheight*
+Default: 5
+Minimum height used when computing the bottom terminal and outline.
+
+                                        *g:project_management_opencode_cmd*
+Default: `opencode`
+Executable used for the left panel.
+
+                                        *g:project_management_opencode_args*
+Default: `[]`
+Extra arguments passed to opencode, for example `['--continue']`.
+
+                                        *g:project_management_shell*
+Default: empty
+Shell used for the bottom terminal.  Empty means `&shell`.
+
+                                        *g:project_management_enable_terminals*
+Default: 1
+Set to 0 to create placeholder buffers instead of starting opencode and the
+shell terminal.  Intended for headless tests.
+
+                                        *g:project_management_enable_netrw*
+Default: 1
+Set to 0 to use a placeholder buffer instead of netrw.  Intended for tests.
+
+==============================================================================
+6. NOTES                                               *project-management-notes*
+
+- The outline uses coc's `outline.splitCommand = edit` while a project is
+  active and restores the previous value on close.  This makes coc open the
+  outline in the reserved right-hand window instead of a new column.
+- If the LSP is not ready when the project opens, the outline window shows a
+  placeholder.  Press |F2| or run |:ProjectOutline| after the language server
+  is ready.
+- `:ProjectClose!` is destructive by design.
+- While a project is active, |F2| toggles the project outline.  Outside a
+  project it keeps the normal coc outline behavior.
+
+==============================================================================
+vim:tw=78:ts=8:noet:ft=help:norl:
