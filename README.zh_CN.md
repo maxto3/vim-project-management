@@ -103,14 +103,17 @@ coc outline 切换行为。
   `aboveleft`/`belowright` 分割构建布局。已有 buffer 会保留。
 - 项目打开期间临时启用 `'hidden'`，让中间编辑器可以同时持有多个 buffer。
   关闭时恢复原值。
-- netrw 使用 `g:netrw_browse_split = 4`，文件在“上一个窗口”打开。通常这个
-  窗口是中间编辑器；如果先从 outline 切到文件浏览器，请先从编辑器进入文件
-  浏览器再选择文件。
+- netrw 通过项目映射显式在中间编辑器打开文件；选择目录则留在文件浏览器内。
 - outline 在项目期间使用 coc 的 `outline.splitCommand = edit`，在右侧预留
   窗口中打开，不新开列。关闭项目时恢复原值。
-- 如果项目打开时 LSP 尚未就绪，outline 窗口显示“Outline unavailable”占位。
-  等该文件的 LSP 就绪后按 `F2` 或执行 `:ProjectOutline`，coc 会填充 outline
-  并跟随当前 buffer。
+- 项目期间会关闭 coc 的 `outline.checkBufferSwitch`，只在中编辑器的 buffer
+  变化时刷新 outline。光标移到 netrw、终端或 opencode 时，outline 继续显示
+  当前源代码结构，不会变成 “Document symbol provider not found”。
+- 按 `,O`（leader + `O`）在中间编辑器和 outline 之间切换焦点。命令形式为
+  `:ProjectFocusOutline`。在 outline 条目上按回车会跳转到编辑器对应符号；
+  `Ctrl-W p` 返回上一个窗口。
+- 如果项目打开时 LSP 尚未就绪，outline 窗口显示占位。等该文件的 LSP 就绪后
+  按 `F2` 或执行 `:ProjectOutline`，coc 会填充 outline 并跟随当前 buffer。
 - outline 的打开/关闭不会替换中间编辑器的文件。
 
 ## 配置

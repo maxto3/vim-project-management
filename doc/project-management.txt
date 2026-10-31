@@ -82,6 +82,10 @@ causes `E1173` after `enddef` in Vim9 scripts.
                         language server is ready if the outline started with an
                         "Outline unavailable" placeholder.
 
+                                                        *:ProjectFocusOutline*
+:ProjectFocusOutline    Toggle focus between the center editor and the outline
+                        window.  The sample vimrc maps this to <Leader>O.
+
                                                         *:ProjectToggleOutline*
 :ProjectToggleOutline   Toggle the outline in the right column.  While a
                         project is active, |F2| calls this command.
@@ -91,14 +95,18 @@ causes `E1173` after `enddef` in Vim9 scripts.
 
 - The current tab is collapsed to one window, then the layout is built with
   explicit `aboveleft` / `belowright` splits.
-- The center window is the only editing window.  netrw uses
-  `g:netrw_browse_split = 4` so files open in the previous window; the editor
-  is normally that window.
+- The center window is the only editing window.  The project maps netrw's
+  <CR> and double-click to open files explicitly in the center editor;
+  directories stay in the browser.
 - The left column runs opencode with the project root as its working
   directory.
 - The bottom row runs the shell with the project root as its working
   directory.
 - The right column contains netrw and the coc outline.
+- While a project is active, coc's `outline.checkBufferSwitch` is disabled and
+  the plugin refreshes the outline only when the center editor's buffer
+  changes.  Moving focus to netrw/terminal/opencode keeps the outline on the
+  current source file.
 - The plugin temporarily enables 'hidden' while a project is open and restores
   the previous value on close.
 
@@ -152,6 +160,13 @@ Set to 0 to use a placeholder buffer instead of netrw.  Intended for tests.
 - The outline uses coc's `outline.splitCommand = edit` while a project is
   active and restores the previous value on close.  This makes coc open the
   outline in the reserved right-hand window instead of a new column.
+- While a project is active, `outline.checkBufferSwitch` is disabled.  The
+  plugin refreshes the outline only when the center editor's buffer changes,
+  so moving focus to netrw, the terminal or opencode keeps the outline showing
+  the source file.
+- |:ProjectFocusOutline| toggles focus between the editor and the outline.
+  The sample vimrc maps it to `<Leader>O`.  From the outline, |CTRL-W_p| returns
+  to the previous window.
 - If the LSP is not ready when the project opens, the outline window shows a
   placeholder.  Press |F2| or run |:ProjectOutline| after the language server
   is ready.

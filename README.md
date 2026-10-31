@@ -115,13 +115,20 @@ toggle behavior.
 - The plugin temporarily enables `'hidden'` while a project is open so the
   center editor can hold multiple buffers. The previous value is restored on
   close.
-- The netrw browser uses `g:netrw_browse_split = 4` so files open in the
-  previous window. The editor is normally the previous window; if the outline
-  is focused first, focus the file browser from the editor before selecting a
-  file.
+- The netrw browser opens files explicitly in the center editor through a
+  project mapping; selecting a directory stays inside the browser.
 - The outline uses coc's `outline.splitCommand = edit` while a project is
   active. It is opened inside the reserved right-hand window instead of
   creating a new column. The original value is restored on close.
+- While a project is active, the plugin disables coc's
+  `outline.checkBufferSwitch` and refreshes the outline only when the center
+  editor's buffer changes. Moving focus to netrw, the terminal, or opencode
+  keeps the outline showing the current source file instead of switching to
+  "Document symbol provider not found".
+- Press `,O` (leader + `O`) to toggle focus between the center editor and the
+  outline. The command form is `:ProjectFocusOutline`. Pressing `Enter` on an
+  outline item jumps to the symbol in the editor; `Ctrl-W p` returns to the
+  previous window.
 - If the language server is not ready when the project opens, the outline
   window starts with an "Outline unavailable" placeholder. Press `F2` or run
   `:ProjectOutline` after the file's LSP is ready; coc then populates the
