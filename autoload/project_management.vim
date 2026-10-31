@@ -444,19 +444,29 @@ export def NetrwEnter(): void
     return
   endif
 
-  # Make the editor the alternate window, then let netrw handle <CR> itself.
-  # This preserves tree/list navigation and file handling while forcing files
-  # to open in the center editor instead of whichever window was previous.
+  # Make the editor the alternate window, then let netrw resolve the entry and
+  # open it. This preserves tree/list navigation while forcing files to open in
+  # the center editor instead of whichever window was previous.
+  var word = netrw#Call('NetrwGetWord')
+  if type(word) != v:t_string || word == ''
+    return
+  endif
+  var target = netrw#Call('NetrwBrowseChgDir', 1, word, 1)
+  if type(target) != v:t_string || target == ''
+    return
+  endif
+  var isdir = isdirectory(target)
+
   win_gotoid(project.editor_win)
   win_gotoid(project.files_win)
-  silent! execute "normal \<Plug>NetrwLocalBrowseCheck"
+  call netrw#LocalBrowseCheck(target)
 
   var files = project.files_win
   if files > 0 && win_id2win(files) > 0
     win_gotoid(files)
     NetrwSetup()
   endif
-  if win_getid() != files || &filetype != 'netrw'
+  if !isdir
     if project.editor_win > 0 && win_id2win(project.editor_win) > 0
       win_gotoid(project.editor_win)
     endif
