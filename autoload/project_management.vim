@@ -456,11 +456,20 @@ export def NetrwEnter(): void
     tree = get(b:, 'netrw_curdir', project.root)
   endif
 
-  var path = tree
-  if path !~# '[/\\]$'
-    path ..= '/'
+  var line = getline('.')
+  var path = ''
+  var isdir_entry = line =~# '/\s*$'
+  if word == '../' || line ==# '../'
+    path = fnamemodify(get(b:, 'netrw_curdir', project.root), ':h')
+  elseif isdir_entry
+    path = tree
+  else
+    path = tree
+    if path !~# '[/\\]$'
+      path ..= '/'
+    endif
+    path ..= word
   endif
-  path ..= word
   path = substitute(path, '[/\\]\+', '/', 'g')
   path = fnamemodify(path, ':p')
   path = substitute(path, '[/\\]$', '', '')
