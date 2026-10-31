@@ -414,11 +414,19 @@ export def FocusOutline(): void
     echomsg 'No project is open'
     return
   endif
-  Outline()
   if !exists('g:did_coc_loaded')
+    Error('coc.nvim is not available')
     return
   endif
   var winid = coc#window#find('cocViewId', 'OUTLINE')
+  if winid > 0 && win_getid() == winid
+    if project.editor_win > 0 && win_id2win(project.editor_win) > 0
+      win_gotoid(project.editor_win)
+    endif
+    return
+  endif
+  Outline()
+  winid = coc#window#find('cocViewId', 'OUTLINE')
   if winid > 0
     win_gotoid(winid)
   endif
