@@ -46,16 +46,10 @@ line endings. CRLF causes `E1173` after `enddef`.
 
 ## Installation
 
-The development repository lives at:
-
-```text
-D:\source\repos\project-management
-```
-
-Install it through vim-plug from that local Git repository:
+Install it through vim-plug:
 
 ```vim
-Plug 'file:///D:/source/repos/project-management'
+Plug 'https://github.com/maxto3/vim-project-management.git'
 ```
 
 Then run:
@@ -70,9 +64,7 @@ vim-plug clones the repository into:
 C:\Users\<you>\.vim\plugged\project-management
 ```
 
-and loads the plugin from there. The plugin is **not** loaded directly from
-`D:\source\repos\project-management`; use `file:///` rather than a bare
-`D:/...` path so vim-plug treats it as a Git repository and clones it.
+and loads the plugin from there.
 
 After changing and committing the source repository, update the installed
 copy with:
@@ -80,10 +72,6 @@ copy with:
 ```vim
 :PlugUpdate project-management
 ```
-
-Once the source repository is published to a remote (GitHub/GitLab/etc.),
-change the `Plug` URL to that remote address; vim-plug keeps the same
-`~/.vim/plugged/project-management` directory.
 
 ### Backup
 

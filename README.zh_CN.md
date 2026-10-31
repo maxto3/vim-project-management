@@ -40,16 +40,10 @@ Vim 9 / GVim 的 VS Code 风格项目工作区，使用 Vim9 script 编写。
 
 ## 安装
 
-开发源码仓库位于：
-
-```text
-D:\source\repos\project-management
-```
-
-通过 vim-plug 从该本地 Git 仓库安装：
+通过 vim-plug 安装：
 
 ```vim
-Plug 'file:///D:/source/repos/project-management'
+Plug 'https://github.com/maxto3/vim-project-management.git'
 ```
 
 然后执行：
@@ -64,18 +58,13 @@ vim-plug 会克隆到：
 C:\Users\<you>\.vim\plugged\project-management
 ```
 
-并从该目录加载插件。插件**不会**直接从 `D:\source\repos\project-management`
-加载；必须使用 `file:///`，不要用裸的 `D:/...` 路径，否则 vim-plug 会把源码
-目录直接加入 runtimepath，而不是克隆安装。
+并从该目录加载插件。
 
 修改并提交源码仓库后，用下面的命令更新安装副本：
 
 ```vim
 :PlugUpdate project-management
 ```
-
-以后把源码仓库推送到远程（GitHub/GitLab 等）后，把 `Plug` URL 改为远程地址
-即可；vim-plug 仍使用同一个 `~/.vim/plugged/project-management` 目录。
 
 ### 备份
 
