@@ -147,6 +147,16 @@ def ApplyResult(res: dict<any>): void
   project.terminal_buf = res.terminal_buf
 enddef
 
+def SetupNetrw(): void
+  if project.files_win > 0 && win_id2win(project.files_win) > 0
+    win_gotoid(project.files_win)
+    NetrwSetup()
+    if project.editor_win > 0 && win_id2win(project.editor_win) > 0
+      win_gotoid(project.editor_win)
+    endif
+  endif
+enddef
+
 def StopTerminals(): void
   terminal.Stop(project.terminal_buf)
   opencode.Stop(project.opencode_buf)
@@ -242,6 +252,7 @@ export def Open(path: string): void
   try
     var res = layout.Build(root, Config())
     ApplyResult(res)
+    SetupNetrw()
   catch
     Error('layout failed: ' .. v:exception)
     Close(false)
@@ -338,6 +349,7 @@ export def Reload(): void
   try
     var res = layout.Build(root, Config())
     ApplyResult(res)
+    SetupNetrw()
   catch
     Error('layout failed: ' .. v:exception)
     return
@@ -405,6 +417,50 @@ def MakeOutlinePlaceholder(files_win: number): number
   endif
   execute 'resize ' .. h
   return w
+enddef
+
+export def NetrwSetup(): void
+  if !project.active
+    return
+  endif
+  if project.files_win <= 0 || win_getid() != project.files_win
+    return
+  endif
+  nnoremap <buffer><silent> <CR> :ProjectNetrwEnter<CR>
+  nnoremap <buffer><silent> <2-LeftMouse> :ProjectNetrwEnter<CR>
+enddef
+
+export def NetrwEnter(): void
+  if !project.active
+    return
+  endif
+  if project.files_win <= 0 || win_id2win(project.files_win) == 0
+    return
+  endif
+  if project.editor_win <= 0 || win_id2win(project.editor_win) == 0
+    return
+  endif
+  if win_getid() != project.files_win
+    return
+  endif
+
+  # Make the editor the alternate window, then let netrw handle <CR> itself.
+  # This preserves tree/list navigation and file handling while forcing files
+  # to open in the center editor instead of whichever window was previous.
+  win_gotoid(project.editor_win)
+  win_gotoid(project.files_win)
+  silent! execute "normal \<Plug>NetrwLocalBrowseCheck"
+
+  var files = project.files_win
+  if files > 0 && win_id2win(files) > 0
+    win_gotoid(files)
+    NetrwSetup()
+  endif
+  if win_getid() != files || &filetype != 'netrw'
+    if project.editor_win > 0 && win_id2win(project.editor_win) > 0
+      win_gotoid(project.editor_win)
+    endif
+  endif
 enddef
 
 export def ToggleOutline(): void
