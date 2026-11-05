@@ -86,6 +86,19 @@ C:\Users\<you>\.vim\plugged\project-management
 项目打开时 `F2` 自动调用 `:ProjectToggleOutline`；非项目状态下保持原有的
 coc outline 切换行为。
 
+## 按键映射
+
+插件默认定义两个普通模式映射：
+
+| 映射 | 命令 | 说明 |
+| --- | --- | --- |
+| `<Leader>wo` | `:ProjectOpen` | 打开当前目录为项目。 |
+| `<Leader>wc` | `:ProjectClose` | 关闭项目，保留非项目 buffer。 |
+
+在插件加载前设置 `g:project_management_default_mappings = 0` 可禁用默认映射，
+改为自定义按键。`F2` 仍会感知项目状态；如需聚焦 outline，请自行映射
+`:ProjectFocusOutline`。
+
 ## 布局与行为
 
 - `:ProjectOpen` 先把当前 tab 收敛为一个窗口，再用显式的
@@ -127,6 +140,9 @@ let g:project_management_enable_terminals = 1
 
 " 测试时可设为 0，用占位窗口替代 netrw
 let g:project_management_enable_netrw = 1
+
+" 设为 0 可禁用默认的 <Leader>wo / <Leader>wc 映射
+let g:project_management_default_mappings = 1
 ```
 
 ## 为什么选择 netrw

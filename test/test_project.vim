@@ -41,6 +41,9 @@ var start = getcwd()
 
 execute 'edit ' .. fnameescape(nonproj)
 
+Check(!empty(maparg('\wo', 'n')), 'default <Leader>wo mapping is defined')
+Check(!empty(maparg('\wc', 'n')), 'default <Leader>wc mapping is defined')
+
 project_management.Open(p1)
 Check(project_management.project.active, 'project active after open')
 Check(N(project_management.project.root) ==# N(p1), 'project root resolves to requested directory')

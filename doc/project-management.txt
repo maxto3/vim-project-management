@@ -90,6 +90,19 @@ causes `E1173` after `enddef` in Vim9 scripts.
 :ProjectToggleOutline   Toggle the outline in the right column.  While a
                         project is active, |F2| calls this command.
 
+                                                        *project-management-mappings*
+MAPPINGS
+
+The plugin defines two normal-mode mappings by default:
+
+  <Leader>wo    Open the project at the current directory (|:ProjectOpen|).
+  <Leader>wc    Close the project, keeping non-project buffers
+                (|:ProjectClose|).
+
+Set |g:project_management_default_mappings| to 0 before the plugin loads to
+disable them and define your own keys.  |F2| remains project-aware; map
+|:ProjectFocusOutline| yourself if you want a focus toggle.
+
 ==============================================================================
 4. LAYOUT                                             *project-management-layout*
 
@@ -153,6 +166,11 @@ shell terminal.  Intended for headless tests.
                                         *g:project_management_enable_netrw*
 Default: 1
 Set to 0 to use a placeholder buffer instead of netrw.  Intended for tests.
+
+                                        *g:project_management_default_mappings*
+Default: 1
+Define the default <Leader>wo and <Leader>wc mappings.  Set to 0 before the
+plugin loads to define your own keys.
 
 ==============================================================================
 6. NOTES                                               *project-management-notes*

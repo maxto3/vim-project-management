@@ -16,6 +16,13 @@ command! ProjectToggleOutline project_management.ToggleOutline()
 command! ProjectNetrwEnter project_management.NetrwEnter()
 command! ProjectFocusOutline project_management.FocusOutline()
 
+# Default workspace mappings. Set g:project_management_default_mappings = 0
+# before the plugin loads to define your own keys instead.
+if get(g:, 'project_management_default_mappings', 1)
+  nnoremap <silent> <Leader>wo <Cmd>ProjectOpen<CR>
+  nnoremap <silent> <Leader>wc <Cmd>ProjectClose<CR>
+endif
+
 def OnNetrw()
   project_management.NetrwSetup()
 enddef

@@ -95,6 +95,19 @@ canonical development copy.
 `:ProjectToggleOutline`. Outside a project it keeps the normal coc outline
 toggle behavior.
 
+## Mappings
+
+The plugin defines two normal-mode mappings by default:
+
+| Mapping | Command | Description |
+| --- | --- | --- |
+| `<Leader>wo` | `:ProjectOpen` | Open the project at the current directory. |
+| `<Leader>wc` | `:ProjectClose` | Close the project, keeping non-project buffers. |
+
+Set `g:project_management_default_mappings = 0` before the plugin loads to
+disable them and map your own keys. `F2` stays project-aware; map
+`:ProjectFocusOutline` separately if you want a focus toggle.
+
 ## Layout and behavior
 
 - `:ProjectOpen` collapses the current tab to one window, then builds the
@@ -146,6 +159,9 @@ let g:project_management_enable_terminals = 1
 
 " Set to 0 to use a placeholder instead of netrw (useful in tests).
 let g:project_management_enable_netrw = 1
+
+" Set to 0 to disable the default <Leader>wo / <Leader>wc mappings.
+let g:project_management_default_mappings = 1
 ```
 
 ## File browser notes
