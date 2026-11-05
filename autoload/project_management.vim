@@ -271,7 +271,7 @@ export def Open(path: string): void
     win_gotoid(project.editor_win)
   endif
   echomsg 'Project opened: ' .. root
-  doautocmd <nomodeline> User ProjectOpened
+  silent doautocmd <nomodeline> User ProjectOpened
 enddef
 
 export def Close(force: bool): bool
@@ -334,7 +334,7 @@ export def Close(force: bool): bool
 
   RestoreEnvironment()
   ResetState()
-  doautocmd <nomodeline> User ProjectClosed
+  silent doautocmd <nomodeline> User ProjectClosed
   echomsg 'Project closed. PWD: ' .. getcwd()
   return true
 enddef
