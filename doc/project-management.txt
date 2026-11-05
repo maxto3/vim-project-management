@@ -103,6 +103,22 @@ Set |g:project_management_default_mappings| to 0 before the plugin loads to
 disable them and define your own keys.  |F2| remains project-aware; map
 |:ProjectFocusOutline| yourself if you want a focus toggle.
 
+                                                        *project-management-events*
+EVENTS
+
+Companion plugins can react to project lifecycle changes through user events:
+
+  *ProjectOpened*       `User ProjectOpened`
+                        Fired after the layout is built and the project is
+                        active.
+
+  *ProjectClosed*       `User ProjectClosed`
+                        Fired after |:ProjectClose| has reset the project
+                        state.
+
+For example, a plugin can restore the working directory that was active
+before the project was opened by handling `User ProjectClosed`.
+
 ==============================================================================
 4. LAYOUT                                             *project-management-layout*
 

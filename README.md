@@ -108,6 +108,16 @@ Set `g:project_management_default_mappings = 0` before the plugin loads to
 disable them and map your own keys. `F2` stays project-aware; map
 `:ProjectFocusOutline` separately if you want a focus toggle.
 
+## Events
+
+| Event | When |
+| --- | --- |
+| `User ProjectOpened` | After the layout is built and the project is active. |
+| `User ProjectClosed` | After `:ProjectClose` has reset the project state. |
+
+Companion plugins can use these events to update their own state, for example
+to restore the working directory that was active before the project opened.
+
 ## Layout and behavior
 
 - `:ProjectOpen` collapses the current tab to one window, then builds the

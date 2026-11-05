@@ -99,6 +99,15 @@ coc outline 切换行为。
 改为自定义按键。`F2` 仍会感知项目状态；如需聚焦 outline，请自行映射
 `:ProjectFocusOutline`。
 
+## 事件
+
+| 事件 | 触发时机 |
+| --- | --- |
+| `User ProjectOpened` | 布局构建完成、项目状态已激活之后。 |
+| `User ProjectClosed` | `:ProjectClose` 重置项目状态之后。 |
+
+配套插件可以监听这些事件同步自身状态，例如恢复打开项目前的工作目录。
+
 ## 布局与行为
 
 - `:ProjectOpen` 先把当前 tab 收敛为一个窗口，再用显式的
