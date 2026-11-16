@@ -188,6 +188,22 @@ Default: 1
 Define the default <Leader>wo and <Leader>wc mappings.  Set to 0 before the
 plugin loads to define your own keys.
 
+                                        *g:project_management_opencode_esc*
+Default: `'app'`
+Esc policy for the opencode terminal: `'app'` passes Esc to opencode,
+`'normal'` maps it to Terminal-Normal.
+
+                                        *g:project_management_terminal_esc*
+Default: `'normal'`
+Esc policy for the project bottom shell.  `'app'` passes Esc to the shell,
+`'normal'` maps it to Terminal-Normal.
+
+The coc-powershell terminal reads `g:project_management_powershell_esc` from
+`_vimrc`; its default is `'normal'`.
+
+In terminal windows, `Ctrl-W w/h/j/k/l` still performs Vim window navigation
+and `Ctrl-W .` sends a literal Ctrl-W to the job.
+
 ==============================================================================
 6. NOTES                                               *project-management-notes*
 

@@ -15,7 +15,11 @@ export def Start(root: string): number
   setbufvar(buf, '&bufhidden', 'hide')
   setlocal nonumber norelativenumber signcolumn=no
   setlocal winfixheight
-  tnoremap <buffer><silent> <Esc> <C-\><C-N>
+  # Keep Esc for Terminal-Normal by default; set
+  # g:project_management_terminal_esc = 'app' to pass it to the shell job.
+  if get(g:, 'project_management_terminal_esc', 'normal') ==# 'normal'
+    tnoremap <buffer><silent> <Esc> <C-\><C-N>
+  endif
   return buf
 enddef
 

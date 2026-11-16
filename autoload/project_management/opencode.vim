@@ -17,6 +17,11 @@ export def Start(root: string, args: list<string> = []): number
   endif
   cmd += args
 
+  # The project opencode panel follows the Vim colorscheme through the global
+  # CLI config: _vimrc generates ~/.config/opencode/themes/gvim.json from the
+  # active highlight groups and points cli.json at it.  Passing the theme via
+  # OPENCODE_CLI_CONFIG_CONTENT does not work here: with an inline config the
+  # TUI cannot resolve custom theme files and silently falls back to a built-in.
   var buf = term_start(cmd, {
     cwd: root,
     curwin: true,
@@ -26,7 +31,12 @@ export def Start(root: string, args: list<string> = []): number
   setbufvar(buf, '&bufhidden', 'hide')
   setlocal nonumber norelativenumber signcolumn=no
   setlocal winfixwidth
-  tnoremap <buffer><silent> <Esc> <C-\><C-N>
+  # Esc is passed to opencode by default so its dialogs and prompts work.
+  # Set g:project_management_opencode_esc = 'normal' to make Esc enter
+  # Terminal-Normal instead.
+  if get(g:, 'project_management_opencode_esc', 'app') ==# 'normal'
+    tnoremap <buffer><silent> <Esc> <C-\><C-N>
+  endif
   return buf
 enddef
 

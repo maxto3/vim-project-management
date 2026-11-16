@@ -172,7 +172,19 @@ let g:project_management_enable_netrw = 1
 
 " Set to 0 to disable the default <Leader>wo / <Leader>wc mappings.
 let g:project_management_default_mappings = 1
+
+" Per-extension highlight groups for the project file browser.
+" Keys are extensions without the dot; values are highlight groups.
+let g:project_management_netrw_ext_groups = {}
+
+" Esc policy for terminal panels: 'app' passes Esc to the program,
+" 'normal' enters Terminal-Normal instead.
+let g:project_management_opencode_esc = 'app'
+let g:project_management_terminal_esc = 'normal'
 ```
+
+`g:project_management_powershell_esc` (read in `_vimrc`) controls the same
+behavior for the coc-powershell terminal.
 
 ## File browser notes
 
@@ -181,7 +193,17 @@ The project uses the built-in netrw rather than coc-explorer:
 - zero additional dependencies;
 - `g:netrw_browse_split = 4` matches the "open in the center editor" model;
 - the file browser can be placed in the right column without another coc tree
-  view competing with the outline.
+  view competing with the outline;
+- in project mode the listing is sorted by extension (directories first) and
+  file names are colored by extension; override the colors with
+  `g:project_management_netrw_ext_groups`.
+
+Terminal keys:
+
+- `Esc` is delivered to opencode by default; use `Ctrl-\ Ctrl-N` or
+  `Ctrl-W N` to enter Terminal-Normal.
+- `Ctrl-W w/h/j/k/l` still performs Vim window navigation.
+- `Ctrl-W .` sends a literal `Ctrl-W` to the terminal job.
 
 ## Testing
 

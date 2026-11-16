@@ -5,6 +5,7 @@ import autoload 'project_management/files.vim'
 import autoload 'project_management/outline.vim'
 import autoload 'project_management/opencode.vim'
 import autoload 'project_management/terminal.vim'
+import autoload 'project_management/netrw.vim' as netrwcolors
 
 export var project: dict<any> = {
   active: false,
@@ -497,6 +498,7 @@ export def NetrwSetup(): void
   endif
   nnoremap <buffer><silent> <CR> :ProjectNetrwEnter<CR>
   nnoremap <buffer><silent> <2-LeftMouse> :ProjectNetrwEnter<CR>
+  netrwcolors.ApplyColors()
 enddef
 
 export def NetrwEnter(): void

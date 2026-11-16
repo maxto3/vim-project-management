@@ -152,13 +152,32 @@ let g:project_management_enable_netrw = 1
 
 " 设为 0 可禁用默认的 <Leader>wo / <Leader>wc 映射
 let g:project_management_default_mappings = 1
+
+" 项目文件浏览器的扩展名高亮组；键为不带点的扩展名，值为 highlight group
+let g:project_management_netrw_ext_groups = {}
+
+" 终端 Esc 策略：'app' 把 Esc 透传给程序，'normal' 进入 Terminal-Normal
+let g:project_management_opencode_esc = 'app'
+let g:project_management_terminal_esc = 'normal'
 ```
+
+`g:project_management_powershell_esc`（在 `_vimrc` 中读取）控制
+coc-powershell 终端的同样行为。
 
 ## 为什么选择 netrw
 
 - 零额外依赖；
 - `g:netrw_browse_split = 4` 正好对应“在中间编辑器打开”；
-- 可以直接放在右栏，不需要再引入一个 coc 树视图与 outline 竞争窗口位置。
+- 可以直接放在右栏，不需要再引入一个 coc 树视图与 outline 竞争窗口位置；
+- 项目模式下按扩展名排序（目录优先），并按扩展名给文件名着色；可用
+  `g:project_management_netrw_ext_groups` 覆盖颜色。
+
+终端按键：
+
+- 默认把 `Esc` 交给 opencode；用 `Ctrl-\ Ctrl-N` 或 `Ctrl-W N` 进入
+  Terminal-Normal；
+- `Ctrl-W w/h/j/k/l` 仍然执行 Vim 窗口切换；
+- `Ctrl-W .` 向终端作业发送字面 `Ctrl-W`。
 
 ## 测试
 
