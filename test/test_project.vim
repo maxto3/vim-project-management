@@ -2,6 +2,7 @@ vim9script
 
 import autoload 'project_management.vim'
 import autoload 'project_management/netrw.vim' as netrwcolors
+import autoload 'project_management/commit.vim' as commitmsg
 
 var failures: list<string> = []
 
@@ -67,6 +68,24 @@ Check(extcolors['md'] !=# extcolors['js'], 'md and js use different colours')
 Check(extcolors['yaml'] !=# extcolors['json'], 'yaml and json use different colours')
 Check(extcolors['c'] !=# extcolors['cpp'], 'c and cpp use different colours')
 Check(netrwcolors.NameColor('.gitignore') !=# netrwcolors.NameColor('LICENSE'), 'dotfiles and LICENSE differ')
+
+var jsonl = ['{"type":"step_start"}',
+      \ '{"type":"text","part":{"id":"p1","type":"text","text":"Add commit helper\n\n- parse the stream"}}']
+Check(commitmsg.ParseJsonl(jsonl) ==# "Add commit helper\n\n- parse the stream", 'commit: JSONL stream is parsed')
+Check(commitmsg.ParseJsonl(['{"type":"text","part":{"id":"p","type":"text","text":"Build it"}}{"type":"text","part":{"id":"p","type":"text","text":"Build it"}}']) ==# 'Build it', 'commit: concatenated JSON objects are parsed once')
+Check(commitmsg.ParseJsonl(['{"type":"text","part":{"id":"p2","type":"text","text":"```\nSubject\n```"}}']) ==# 'Subject', 'commit: code fences are stripped')
+
+if executable('git')
+  var crepo = base .. '/commit-repo'
+  mkdir(crepo)
+  system('git -C ' .. shellescape(crepo) .. ' init -q')
+  writefile(['one'], crepo .. '/one.txt')
+  system('git -C ' .. shellescape(crepo) .. ' add one.txt')
+  Check(!empty(commitmsg.StagedFiles(crepo)), 'commit: staged files are detected')
+  var local = commitmsg.LocalMessage(crepo)
+  Check(local =~# '^Update', 'commit: local fallback builds a subject')
+  Check(local =~# 'one.txt', 'commit: local fallback mentions the file')
+endif
 
 Check(netrwcolors.MatchExtText('│ main.py', 'py') ==# 'main.py', 'extension rule covers the whole file name')
 Check(netrwcolors.MatchExtText('│ my notes.md', 'md') ==# 'my notes.md', 'names with spaces are fully coloured')

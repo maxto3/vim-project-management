@@ -5,6 +5,7 @@ import autoload 'project_management/files.vim'
 import autoload 'project_management/outline.vim'
 import autoload 'project_management/opencode.vim'
 import autoload 'project_management/terminal.vim'
+import autoload 'project_management/commit.vim' as commitmsg
 import autoload 'project_management/netrw.vim' as netrwcolors
 
 export var project: dict<any> = {
@@ -775,6 +776,23 @@ export def RefreshNetrwColors(): void
       win_execute(info.winid, 'call ProjectNetrwRecolor()')
     endif
   endfor
+enddef
+
+# Commit helpers: :ProjectCommit builds a message for the staged changes.
+export def Commit(): void
+  if !project.active
+    echomsg 'No project is open'
+    return
+  endif
+  commitmsg.Start(project.root)
+enddef
+
+export def CommitAccept(): void
+  commitmsg.Accept()
+enddef
+
+export def CommitAbort(): void
+  commitmsg.Abort()
 enddef
 
 export def Status(): void

@@ -108,6 +108,7 @@ The plugin defines five normal-mode mappings by default:
 | `<Leader>wt` | `:ProjectFocus terminal` | Jump to the bottom terminal window. |
 | `<Leader>wl` | `:ProjectFocus outline` | Jump to the outline window (opens it when needed). |
 | `<F11>` | `:ProjectFocusMode` | Toggle focus mode: a single tab with only the editor. |
+| `<Leader>gc` | `:ProjectCommit` | Generate a commit message for the staged changes. |
 
 The focus mappings are also defined for terminal windows, so they work while
 typing in opencode or the bottom shell.

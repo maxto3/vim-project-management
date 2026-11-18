@@ -17,6 +17,9 @@ command! ProjectNetrwEnter project_management.NetrwEnter()
 command! ProjectFocusOutline project_management.FocusOutline()
 command! -nargs=1 ProjectFocus project_management.Focus(<q-args>)
 command! ProjectFocusMode project_management.ToggleFocusMode()
+command! ProjectCommit project_management.Commit()
+command! ProjectCommitAccept project_management.CommitAccept()
+command! ProjectCommitAbort project_management.CommitAbort()
 
 # Default workspace mappings. Set g:project_management_default_mappings = 0
 # before the plugin loads to define your own keys instead.
@@ -36,6 +39,9 @@ if get(g:, 'project_management_default_mappings', 1)
   # F11: focus mode - a single tab with only the editor buffer.
   nnoremap <silent> <F11> <Cmd>ProjectFocusMode<CR>
   tnoremap <silent> <F11> <Cmd>ProjectFocusMode<CR>
+  # Commit message generation for the staged changes.
+  nnoremap <silent> <Leader>gc <Cmd>ProjectCommit<CR>
+  tnoremap <silent> <Leader>gc <Cmd>ProjectCommit<CR>
 endif
 
 def OnNetrw()

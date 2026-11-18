@@ -99,6 +99,7 @@ coc outline 切换行为。
 | `<Leader>wt` | `:ProjectFocus terminal` | 跳转到底部终端窗口。 |
 | `<Leader>wl` | `:ProjectFocus outline` | 跳转到 outline 窗口（未打开时自动打开）。 |
 | `<F11>` | `:ProjectFocusMode` | 切换专注模式：新开一个只保留编辑器窗口的 tab。 |
+| `<Leader>gc` | `:ProjectCommit` | 为已暂存改动生成 commit message。 |
 
 这三个跳转映射在终端窗口里同样有效，因此在 opencode 或底部 shell 中不用先退出终端模式。
 
