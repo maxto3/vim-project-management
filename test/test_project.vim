@@ -1,6 +1,7 @@
 vim9script
 
 import autoload 'project_management.vim'
+import autoload 'project_management/netrw.vim' as netrwcolors
 
 var failures: list<string> = []
 
@@ -43,6 +44,35 @@ execute 'edit ' .. fnameescape(nonproj)
 
 Check(!empty(maparg('\wo', 'n')), 'default <Leader>wo mapping is defined')
 Check(!empty(maparg('\wc', 'n')), 'default <Leader>wc mapping is defined')
+Check(!empty(maparg('\we', 'n')), 'default <Leader>we mapping is defined')
+Check(!empty(maparg('\wa', 'n')), 'default <Leader>wa mapping is defined')
+Check(!empty(maparg('\wt', 'n')), 'default <Leader>wt mapping is defined')
+Check(!empty(maparg('\wl', 'n')), 'default <Leader>wl mapping is defined')
+Check(!empty(maparg('<F11>', 'n')), 'F11 focus-mode mapping is defined')
+Check(!empty(maparg('<F11>', 't')), 'F11 terminal focus-mode mapping is defined')
+Check(!empty(maparg('\we', 't')), 'default <Leader>we terminal mapping is defined')
+Check(!empty(maparg('\wa', 't')), 'default <Leader>wa terminal mapping is defined')
+Check(!empty(maparg('\wt', 't')), 'default <Leader>wt terminal mapping is defined')
+Check(!empty(maparg('\wl', 't')), 'default <Leader>wl terminal mapping is defined')
+
+var extcolors = netrwcolors.ExtColorMap()
+Check(len(extcolors) >= 40, 'extension colour map covers the curated extensions')
+var palette: dict<bool> = {}
+for [_, color] in items(extcolors)
+  palette[color] = true
+endfor
+Check(len(palette) >= 40, 'extension colours are mostly distinct')
+Check(extcolors['md'] !=# extcolors['py'], 'md and py use different colours')
+Check(extcolors['md'] !=# extcolors['js'], 'md and js use different colours')
+Check(extcolors['yaml'] !=# extcolors['json'], 'yaml and json use different colours')
+Check(extcolors['c'] !=# extcolors['cpp'], 'c and cpp use different colours')
+Check(netrwcolors.NameColor('.gitignore') !=# netrwcolors.NameColor('LICENSE'), 'dotfiles and LICENSE differ')
+
+Check(netrwcolors.MatchExtText('│ main.py', 'py') ==# 'main.py', 'extension rule covers the whole file name')
+Check(netrwcolors.MatchExtText('│ my notes.md', 'md') ==# 'my notes.md', 'names with spaces are fully coloured')
+Check(netrwcolors.MatchExtText('│ netrw-demo/', 'md') ==# '', 'directories are not coloured')
+Check(netrwcolors.MatchNameText('│ .gitignore', '.gitignore') ==# '.gitignore', 'dotfile rule covers the whole name')
+Check(netrwcolors.MatchNameText('│ LICENSE*', 'LICENSE') ==# 'LICENSE', 'executable marker stays outside the match')
 
 project_management.Open(p1)
 Check(project_management.project.active, 'project active after open')
@@ -54,6 +84,32 @@ Check(N(getcwd()) ==# N(p1), 'PWD is the project root')
 win_gotoid(project_management.project.editor_win)
 execute 'edit ' .. fnameescape(p1 .. '/alpha.txt')
 Check(N(bufname('%')) ==# N(p1 .. '/alpha.txt'), 'editor opens project file')
+
+project_management.Focus('files')
+Check(win_getid() == project_management.project.files_win, 'Focus files moves to the file browser window')
+project_management.Focus('opencode')
+Check(win_getid() == project_management.project.opencode_win, 'Focus opencode moves to the opencode window')
+project_management.Focus('terminal')
+Check(win_getid() == project_management.project.terminal_win, 'Focus terminal moves to the terminal window')
+project_management.Focus('outline')
+Check(win_getid() == project_management.project.outline_win, 'Focus outline moves to the outline window')
+project_management.Focus('outline')
+Check(win_getid() == project_management.project.editor_win, 'Focus outline toggles back to the editor')
+var before_unknown = win_getid()
+project_management.Focus('nope')
+Check(win_getid() == before_unknown, 'unknown focus target keeps the current window')
+
+win_gotoid(project_management.project.editor_win)
+project_management.ToggleFocusMode()
+Check(tabpagenr('$') == 2, 'focus mode opens a second tab')
+Check(winnr('$') == 1, 'focus mode shows a single window')
+Check(project_management.FocusModeActive(), 'focus mode reports active')
+Check(N(bufname('%')) ==# N(p1 .. '/alpha.txt'), 'focus mode keeps the editor buffer')
+project_management.ToggleFocusMode()
+Check(tabpagenr('$') == 1, 'focus mode closes its tab')
+Check(winnr('$') == 5, 'focus mode restores the project layout')
+Check(win_getid() == project_management.project.editor_win, 'focus mode returns to the editor window')
+win_gotoid(project_management.project.editor_win)
 
 var ok = project_management.Close(false)
 Check(ok, 'ProjectClose returns true')

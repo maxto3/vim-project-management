@@ -23,6 +23,10 @@ export var project: dict<any> = {
   saved_outline_split: 'botright 30vs',
   saved_outline_check: true,
   outline_buf: -1,
+  focus_tab: 0,
+  focus_win: 0,
+  main_tab: 0,
+  main_win: 0,
 }
 
 var outline_busy = false
@@ -220,6 +224,10 @@ def ResetState(): void
   project.saved_outline_split = 'botright 30vs'
   project.saved_outline_check = true
   project.outline_buf = -1
+  project.focus_tab = 0
+  project.focus_win = 0
+  project.main_tab = 0
+  project.main_win = 0
 enddef
 
 export def Open(path: string): void
@@ -279,6 +287,10 @@ export def Close(force: bool): bool
   if !project.active
     echomsg 'No project is open'
     return false
+  endif
+
+  if FocusModeTab() > 0
+    LeaveFocusMode()
   endif
 
   if !force
@@ -344,6 +356,10 @@ export def Reload(): void
   if !project.active
     echomsg 'No project is open'
     return
+  endif
+
+  if FocusModeTab() > 0
+    LeaveFocusMode()
   endif
 
   var root = project.root
@@ -418,7 +434,19 @@ export def FocusOutline(): void
     return
   endif
   if !exists('g:did_coc_loaded')
-    Error('coc.nvim is not available')
+    # Without coc.nvim the right column still holds a placeholder outline.
+    var placeholder = project.outline_win
+    if placeholder <= 0 || win_id2win(placeholder) == 0
+      Error('outline window is missing; run :ProjectReload')
+      return
+    endif
+    if win_getid() == placeholder
+      if project.editor_win > 0 && win_id2win(project.editor_win) > 0
+        win_gotoid(project.editor_win)
+      endif
+      return
+    endif
+    win_gotoid(placeholder)
     return
   endif
   var winid = coc#window#find('cocViewId', 'OUTLINE')
@@ -616,6 +644,139 @@ export def ToggleOutline(): void
   outline_busy = false
 enddef
 
+export def Focus(kind: string): void
+  if !project.active
+    echomsg 'No project is open'
+    return
+  endif
+  if kind ==# 'outline'
+    # Same behaviour as <Leader>O: focus, opening the outline when needed,
+    # and toggle back to the editor when it already has the focus.
+    FocusOutline()
+    return
+  endif
+  var target = 0
+  var label = ''
+  if kind ==# 'files' || kind ==# 'explorer' || kind ==# 'netrw'
+    target = project.files_win
+    label = 'file browser'
+  elseif kind ==# 'opencode'
+    target = project.opencode_win
+    label = 'opencode'
+  elseif kind ==# 'terminal'
+    target = project.terminal_win
+    label = 'terminal'
+  else
+    Error('unknown focus target: ' .. kind .. ' (files, opencode, terminal, outline)')
+    return
+  endif
+  if target <= 0 || win_id2win(target) == 0
+    Error(label .. ' window is missing; run :ProjectReload')
+    return
+  endif
+  win_gotoid(target)
+enddef
+
+# ---- focus mode ---------------------------------------------------------
+# A separate tab that shows only the project editor buffer.  The original
+# layout stays untouched in its own tab.
+
+def FocusModeTab(): number
+  if project.focus_tab <= 0 || project.focus_win <= 0
+    return 0
+  endif
+  var info = win_id2tabwin(project.focus_win)
+  if empty(info) || info[0] <= 0 || info[0] != project.focus_tab
+    # The tab was closed behind our back.
+    project.focus_tab = 0
+    project.focus_win = 0
+    return 0
+  endif
+  return project.focus_tab
+enddef
+
+export def FocusModeActive(): bool
+  return FocusModeTab() > 0 && tabpagenr() == project.focus_tab
+enddef
+
+def EnterFocusMode(): void
+  project.main_tab = tabpagenr()
+  project.main_win = win_getid()
+  var buf = -1
+  if project.editor_win > 0 && win_id2win(project.editor_win) > 0
+    buf = winbufnr(project.editor_win)
+  else
+    buf = bufnr('%')
+  endif
+  execute 'tabnew'
+  project.focus_tab = tabpagenr()
+  project.focus_win = win_getid()
+  if buf > 0 && bufexists(buf)
+    execute 'buffer ' .. buf
+  endif
+  silent! only
+  if project.focus_tab > 0
+    echomsg 'Focus mode: ' .. expand('%:t')
+  endif
+enddef
+
+def LeaveFocusMode(): void
+  var focus_tab = FocusModeTab()
+  if focus_tab <= 0
+    return
+  endif
+  # Keep whatever the user opened while in focus mode.
+  var buf = tabpagenr() == focus_tab ? bufnr('%') : -1
+  var main_tab = project.main_tab
+  if main_tab <= 0 || main_tab > tabpagenr('$') || main_tab == focus_tab
+    main_tab = focus_tab == 1 ? 2 : 1
+  endif
+  if main_tab <= tabpagenr('$')
+    execute 'tabnext ' .. main_tab
+  endif
+  if project.editor_win > 0 && win_id2win(project.editor_win) > 0
+    win_gotoid(project.editor_win)
+    if buf > 0 && bufexists(buf)
+      execute 'buffer ' .. buf
+    endif
+  endif
+  if focus_tab <= tabpagenr('$')
+    execute 'tabclose ' .. focus_tab
+  endif
+  project.focus_tab = 0
+  project.focus_win = 0
+  project.main_tab = 0
+  project.main_win = 0
+  if exists('g:did_coc_loaded')
+    OnEditorBufEnter()
+  endif
+enddef
+
+# F11: enter a one-window tab with the current project file, or leave it.
+export def ToggleFocusMode(): void
+  if !project.active
+    echomsg 'No project is open'
+    return
+  endif
+  var focus_tab = FocusModeTab()
+  if focus_tab > 0 && tabpagenr() == focus_tab
+    LeaveFocusMode()
+  elseif focus_tab > 0
+    execute 'tabnext ' .. focus_tab
+  else
+    EnterFocusMode()
+  endif
+enddef
+
+# Recompute the file-browser colours, e.g. after :colorscheme.
+export def RefreshNetrwColors(): void
+  for info in getwininfo()
+    if getbufvar(info.bufnr, '&filetype') == 'netrw'
+      win_execute(info.winid, 'call ProjectNetrwRecolor()')
+    endif
+  endfor
+enddef
+
 export def Status(): void
   if !project.active
     echomsg 'No project is open'
@@ -629,6 +790,7 @@ export def Status(): void
     'outline=' .. project.outline_win,
     'opencode=' .. project.opencode_win .. '(buf ' .. project.opencode_buf .. ')',
     'terminal=' .. project.terminal_win .. '(buf ' .. project.terminal_buf .. ')',
+    'focus=' .. FocusModeTab(),
     'hidden=' .. string(&hidden),
   ]
   echomsg join(parts, ' | ')

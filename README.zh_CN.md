@@ -88,12 +88,19 @@ coc outline 切换行为。
 
 ## 按键映射
 
-插件默认定义两个普通模式映射：
+插件默认定义五个普通模式映射：
 
 | 映射 | 命令 | 说明 |
 | --- | --- | --- |
 | `<Leader>wo` | `:ProjectOpen` | 打开当前目录为项目。 |
 | `<Leader>wc` | `:ProjectClose` | 关闭项目，保留非项目 buffer。 |
+| `<Leader>we` | `:ProjectFocus files` | 跳转到文件浏览器（netrw）窗口。 |
+| `<Leader>wa` | `:ProjectFocus opencode` | 跳转到 opencode 窗口。 |
+| `<Leader>wt` | `:ProjectFocus terminal` | 跳转到底部终端窗口。 |
+| `<Leader>wl` | `:ProjectFocus outline` | 跳转到 outline 窗口（未打开时自动打开）。 |
+| `<F11>` | `:ProjectFocusMode` | 切换专注模式：新开一个只保留编辑器窗口的 tab。 |
+
+这三个跳转映射在终端窗口里同样有效，因此在 opencode 或底部 shell 中不用先退出终端模式。
 
 在插件加载前设置 `g:project_management_default_mappings = 0` 可禁用默认映射，
 改为自定义按键。`F2` 仍会感知项目状态；如需聚焦 outline，请自行映射
@@ -153,7 +160,7 @@ let g:project_management_enable_netrw = 1
 " 设为 0 可禁用默认的 <Leader>wo / <Leader>wc 映射
 let g:project_management_default_mappings = 1
 
-" 项目文件浏览器的扩展名高亮组；键为不带点的扩展名，值为 highlight group
+" 覆盖文件浏览器自动生成的扩展名颜色；键为不带点的扩展名，值为 highlight group
 let g:project_management_netrw_ext_groups = {}
 
 " 终端 Esc 策略：'app' 把 Esc 透传给程序，'normal' 进入 Terminal-Normal
@@ -169,8 +176,12 @@ coc-powershell 终端的同样行为。
 - 零额外依赖；
 - `g:netrw_browse_split = 4` 正好对应“在中间编辑器打开”；
 - 可以直接放在右栏，不需要再引入一个 coc 树视图与 outline 竞争窗口位置；
-- 项目模式下按扩展名排序（目录优先），并按扩展名给文件名着色；可用
-  `g:project_management_netrw_ext_groups` 覆盖颜色。
+- 项目模式下按扩展名排序（目录优先），每个文件名按扩展名着色（整个文件名，
+  含扩展名，统一使用一种颜色）：色相由扩展名
+  本身决定（金色角分布），饱和度/亮度跟随当前 `Normal` 背景，因此颜色互不
+  重复且会随 `:colorscheme` 自适应；点文件和 `LICENSE`、`Makefile`、
+  `Dockerfile` 等按名字单独配色；仍可用
+  `g:project_management_netrw_ext_groups` 把某个扩展名固定到指定高亮组。
 
 终端按键：
 

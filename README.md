@@ -97,12 +97,20 @@ toggle behavior.
 
 ## Mappings
 
-The plugin defines two normal-mode mappings by default:
+The plugin defines five normal-mode mappings by default:
 
 | Mapping | Command | Description |
 | --- | --- | --- |
 | `<Leader>wo` | `:ProjectOpen` | Open the project at the current directory. |
 | `<Leader>wc` | `:ProjectClose` | Close the project, keeping non-project buffers. |
+| `<Leader>we` | `:ProjectFocus files` | Jump to the file browser (netrw) window. |
+| `<Leader>wa` | `:ProjectFocus opencode` | Jump to the opencode window. |
+| `<Leader>wt` | `:ProjectFocus terminal` | Jump to the bottom terminal window. |
+| `<Leader>wl` | `:ProjectFocus outline` | Jump to the outline window (opens it when needed). |
+| `<F11>` | `:ProjectFocusMode` | Toggle focus mode: a single tab with only the editor. |
+
+The focus mappings are also defined for terminal windows, so they work while
+typing in opencode or the bottom shell.
 
 Set `g:project_management_default_mappings = 0` before the plugin loads to
 disable them and map your own keys. `F2` stays project-aware; map
@@ -173,7 +181,7 @@ let g:project_management_enable_netrw = 1
 " Set to 0 to disable the default <Leader>wo / <Leader>wc mappings.
 let g:project_management_default_mappings = 1
 
-" Per-extension highlight groups for the project file browser.
+" Override the generated extension colours for the file browser.
 " Keys are extensions without the dot; values are highlight groups.
 let g:project_management_netrw_ext_groups = {}
 
@@ -195,8 +203,13 @@ The project uses the built-in netrw rather than coc-explorer:
 - the file browser can be placed in the right column without another coc tree
   view competing with the outline;
 - in project mode the listing is sorted by extension (directories first) and
-  file names are colored by extension; override the colors with
-  `g:project_management_netrw_ext_groups`.
+  every file name is coloured by its extension, the whole name (extension
+  included) using one colour: the hue comes from the
+  extension itself (golden angle) and saturation/lightness follow the
+  current `Normal` background, so colours stay distinct and adapt to
+  `:colorscheme`; dotfiles plus names such as `LICENSE`, `Makefile` and
+  `Dockerfile` have their own colours; `g:project_management_netrw_ext_groups`
+  can still pin an extension to a highlight group.
 
 Terminal keys:
 

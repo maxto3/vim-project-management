@@ -15,12 +15,27 @@ command! ProjectOutline project_management.Outline()
 command! ProjectToggleOutline project_management.ToggleOutline()
 command! ProjectNetrwEnter project_management.NetrwEnter()
 command! ProjectFocusOutline project_management.FocusOutline()
+command! -nargs=1 ProjectFocus project_management.Focus(<q-args>)
+command! ProjectFocusMode project_management.ToggleFocusMode()
 
 # Default workspace mappings. Set g:project_management_default_mappings = 0
 # before the plugin loads to define your own keys instead.
 if get(g:, 'project_management_default_mappings', 1)
   nnoremap <silent> <Leader>wo <Cmd>ProjectOpen<CR>
   nnoremap <silent> <Leader>wc <Cmd>ProjectClose<CR>
+  nnoremap <silent> <Leader>we <Cmd>ProjectFocus files<CR>
+  nnoremap <silent> <Leader>wa <Cmd>ProjectFocus opencode<CR>
+  nnoremap <silent> <Leader>wt <Cmd>ProjectFocus terminal<CR>
+  nnoremap <silent> <Leader>wl <Cmd>ProjectFocus outline<CR>
+  # The same keys work from inside the project terminals (Terminal-Job mode),
+  # so the panels can be switched without leaving the terminal first.
+  tnoremap <silent> <Leader>we <Cmd>ProjectFocus files<CR>
+  tnoremap <silent> <Leader>wa <Cmd>ProjectFocus opencode<CR>
+  tnoremap <silent> <Leader>wt <Cmd>ProjectFocus terminal<CR>
+  tnoremap <silent> <Leader>wl <Cmd>ProjectFocus outline<CR>
+  # F11: focus mode - a single tab with only the editor buffer.
+  nnoremap <silent> <F11> <Cmd>ProjectFocusMode<CR>
+  tnoremap <silent> <F11> <Cmd>ProjectFocusMode<CR>
 endif
 
 def OnNetrw()
@@ -31,9 +46,19 @@ def OnEditorBufEnter()
   project_management.OnEditorBufEnter()
 enddef
 
+def OnColorScheme()
+  project_management.RefreshNetrwColors()
+enddef
+
+# Called from win_execute() so the refresh runs in the browser window.
+def g:ProjectNetrwRecolor()
+  project_management.NetrwSetup()
+enddef
+
 augroup project_management_netrw
   autocmd!
   autocmd FileType netrw call OnNetrw()
+  autocmd ColorScheme * call OnColorScheme()
 augroup END
 
 augroup project_management_editor

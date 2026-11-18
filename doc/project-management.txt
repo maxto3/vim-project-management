@@ -90,14 +90,40 @@ causes `E1173` after `enddef` in Vim9 scripts.
 :ProjectToggleOutline   Toggle the outline in the right column.  While a
                         project is active, |F2| calls this command.
 
+                                                        *:ProjectFocusMode*
+:ProjectFocusMode       Toggle focus mode.  The first call opens a separate
+                        tab with a single window showing the project editor
+                        buffer; the original layout stays untouched in its
+                        own tab.  Calling it again closes that tab and
+                        returns to the layout, carrying the file that was
+                        opened while focus mode was active.
+
+                                                        *:ProjectFocus*
+:ProjectFocus {kind}    Move the cursor to a project window.  {kind} is one of
+                        `files` (the netrw browser), `opencode`, `terminal` or
+                        `outline` (the latter opens the outline when needed
+                        and toggles back to the editor).
+                        Reports an error when the window is gone; run
+                        |:ProjectReload| to rebuild the layout.
+
                                                         *project-management-mappings*
 MAPPINGS
 
-The plugin defines two normal-mode mappings by default:
+The plugin defines five normal-mode mappings by default:
 
   <Leader>wo    Open the project at the current directory (|:ProjectOpen|).
   <Leader>wc    Close the project, keeping non-project buffers
                 (|:ProjectClose|).
+  <Leader>we    Jump to the file browser (netrw) window
+                (|:ProjectFocus| `files`).
+  <Leader>wa    Jump to the opencode window (|:ProjectFocus| `opencode`).
+  <Leader>wt    Jump to the bottom terminal window (|:ProjectFocus| `terminal`).
+  <Leader>wl    Jump to the outline window (|:ProjectFocus| `outline`).
+  <F11>         Toggle focus mode (|:ProjectFocusMode|).
+
+The focus mappings are also defined for terminal windows, so they work
+while typing in opencode or the bottom shell without leaving Terminal-Job mode
+first.
 
 Set |g:project_management_default_mappings| to 0 before the plugin loads to
 disable them and define your own keys.  |F2| remains project-aware; map
@@ -132,6 +158,12 @@ before the project was opened by handling `User ProjectClosed`.
 - The bottom row runs the shell with the project root as its working
   directory.
 - The right column contains netrw and the coc outline.
+- File names in the browser are coloured per extension; the whole file name,
+  extension included, uses that colour.  The colour is derived
+  from the extension itself (golden-angle hue, saturation and lightness follow
+  the current Normal background), so each extension keeps a stable, distinct
+  colour and the palette follows |:colorscheme|.  Dotfiles and well-known names
+  such as LICENSE, Makefile and Dockerfile get colours of their own.
 - While a project is active, coc's `outline.checkBufferSwitch` is disabled and
   the plugin refreshes the outline only when the center editor's buffer
   changes.  Moving focus to netrw/terminal/opencode keeps the outline on the
@@ -182,6 +214,14 @@ shell terminal.  Intended for headless tests.
                                         *g:project_management_enable_netrw*
 Default: 1
 Set to 0 to use a placeholder buffer instead of netrw.  Intended for tests.
+
+                                        *g:project_management_netrw_ext_groups*
+Default: {}
+Override the generated extension colours.  A |Dictionary| that maps an
+extension (without the dot) to a highlight group; that group's foreground
+colour is used for matching file names.  Example: >
+  let g:project_management_netrw_ext_groups = {'md': 'Title', 'py': 'Function'}
+<
 
                                         *g:project_management_default_mappings*
 Default: 1
